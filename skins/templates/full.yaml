@@ -1,0 +1,73 @@
+# THOT Full Skin Template — every supported field
+name: "my-brand"
+description: "My skin"
+author: "you"
+version: "1.0.0"
+homepage: "https://..."
+
+colors:
+  banner_border: "#CD7F32"
+  banner_title: "#FFD700"
+  banner_accent: "#FFBF00"
+  banner_dim: "#B8860B"
+  banner_text: "#FFF8DC"
+  ui_accent: "#FFBF00"
+  ui_label: "#DAA520"
+  ui_ok: "#4caf50"
+  ui_error: "#ef5350"
+  ui_warn: "#ffa726"
+  prompt: "#FFF8DC"
+  input_rule: "#CD7F32"
+  response_border: "#FFD700"
+  status_bar_bg: "#1a1a2e"
+  status_bar_text: "#C0C0C0"
+  status_bar_strong: "#FFD700"
+  status_bar_dim: "#8B8682"
+  status_bar_good: "#8FBC8F"
+  status_bar_warn: "#FFD700"
+  status_bar_bad: "#FF8C00"
+  status_bar_critical: "#FF6B6B"
+  session_label: "#DAA520"
+  session_border: "#8B8682"
+
+spinner:
+  waiting_faces:
+    - "(🔥)"; "(⌁)"; "(⚔)"
+  thinking_faces:
+    - "(🔥)"; "(⌁)"
+  thinking_verbs:
+    - "forging"; "burning"; "cracking"
+  wings:
+    - ["⟪🔥", "🔥⟫"]
+    - ["⟪⚔", "⚔⟫"]
+  pet_frames:
+    - "[#FF6600]   ⠀⠀⠀   [/]\n[#FF7700]   ⠀⠀⠀   [/]"
+    - "[#FF6600]  ⣶⣿⣿⣶  [/]\n[#FF7700]  ⠀⠉⠉⠀  [/]"
+    - "[#FF6600]⣿⣿⣿⣿⣿⣿[/]\n[#FF7700]⣀⣤⣿⣤⣀[/]"
+    - "[#FF6600]  ⣶⣿⣿⣶  [/]\n[#FF7700]  ⠀⠉⠉⠀  [/]"
+    - "[#FF6600]   ⠀⠀⠀   [/]\n[#FF7700]   ⠀⠀⠀   [/]"
+  pet_fallback:
+    - "[#FF6600]  🔥  [/]\n[#FF7700]  .  [/]"
+    - "[#FF6600]🔥🔥🔥[/]\n[#FF7700]🔥🔥🔥[/]"
+    - "[#FF6600]  🔥  [/]\n[#FF7700]  .  [/]"
+
+branding:
+  agent_name: "My Agent"
+  title_format: "My Agent v{version} ({release}) · us {upstream}"
+  welcome: "My agent online."
+  goodbye: "Goodbye!"
+  response_label: " My Agent "
+  prompt_symbol: "❯ "
+  help_header: "(?) Commands"
+
+tool_prefix: "┊"
+tool_emojis:
+  terminal: "⚔"; web_search: "🔎"; read_file: "📖"; write_file: "✏️"
+  patch: "🔧"; delegate_task: "🧠"; vision_analyze: "👁️"
+  execute_code: "💻"; memory: "🧿"; browser_navigate: "🌐"
+
+banner_logo: |
+  [#FFD700]  YOUR_LOGO_HERE  [/]
+
+banner_hero: |
+  [#FFD700]  YOUR_HERO_ART_HERE  [/]

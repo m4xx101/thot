@@ -1,0 +1,19 @@
+# THOT Minimal Skin Template
+# Fill in the blanks, save as ~/.hermes/skins/<name>.yaml
+name: "my-brand"
+description: "My custom skin"
+colors:
+  banner_border: "#CC3300"
+  banner_title: "#FFAA00"
+  banner_accent: "#FF6600"
+  banner_dim: "#663300"
+  banner_text: "#FFF0E0"
+  prompt: "#FFF0E0"
+  response_border: "#FF6600"
+branding:
+  agent_name: "My Agent"
+  welcome: "My agent online."
+  goodbye: "Goodbye!"
+  response_label: " My Agent "
+  prompt_symbol: "❯ "
+  help_header: "(?) Commands"

@@ -1,0 +1,27 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate YAML
+        run: |
+          pip install pyyaml -q
+          python3 -c "import yaml; d=yaml.safe_load(open('skins/cryptex.yaml')); assert d['name']=='cryptex'; print('✓ Valid')"
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: "CRYPTEX v${{ github.ref_name }}"
+          generate_release_notes: true
+          files: |
+            skins/cryptex.yaml
+            skins/templates/minimal.yaml
+            skins/templates/full.yaml
+            scripts/install.sh
