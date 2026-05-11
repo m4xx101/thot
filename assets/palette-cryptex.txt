@@ -1,0 +1,17 @@
+CRYPTEX — Warm Orange on Deep Black
+====================================
+#FF0000  Forge Red       (logo gradient top)
+#FF2200  Ember Red       (logo gradient)
+#FF4400  Flame Orange    (logo gradient, hero)
+#FF6600  Forge Heat      (banner_accent, pet top)
+#FF7700  Deep Ember      (pet bottom line)
+#FF8800  Bright Ember    (hero mid, heatmap l4)
+#FFAA00  CRYPTEX Gold    (banner_title, hero bottom)
+#FFCC00  Light Gold      (hero bottom edge)
+#CC3300  Dark Forge      (banner_border)
+#FFF0E0  Warm White      (banner_text, prompt)
+#993300  Ash Orange      (heatmap level_1)
+#CC4400  Rust Orange     (heatmap level_2)
+#663300  Dark Ash        (banner_dim)
+#0A0A0A  Void Black      (status_bar_bg)
+#333333  Empty Cell      (heatmap empty)
