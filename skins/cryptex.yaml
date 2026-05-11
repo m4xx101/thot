@@ -1,0 +1,128 @@
+name: cryptex
+description: "CRYPTEX — living terminal identity. Animated braille pet, activity heatmap, unified panel."
+author: "m4xx101 / Sayvdev C."
+version: "1.0.0"
+homepage: "https://github.com/m4xx101/thot"
+
+colors:
+  banner_border: "#CC3300"
+  banner_title: "#FFAA00"
+  banner_accent: "#FF6600"
+  banner_dim: "#663300"
+  banner_text: "#FFF0E0"
+  ui_accent: "#FF6600"
+  ui_label: "#FFAA00"
+  ui_ok: "#4caf50"
+  ui_error: "#ef5350"
+  ui_warn: "#ffa726"
+  prompt: "#FFF0E0"
+  input_rule: "#CC3300"
+  response_border: "#FF6600"
+  status_bar_bg: "#0A0A0A"
+  status_bar_text: "#C0C0C0"
+  status_bar_strong: "#FFAA00"
+  status_bar_dim: "#663300"
+  status_bar_good: "#8FBC8F"
+  status_bar_warn: "#FFAA00"
+  status_bar_bad: "#FF6600"
+  status_bar_critical: "#FF3300"
+  session_label: "#FFAA00"
+  session_border: "#663300"
+
+spinner:
+  pet_frames:
+    - "[#FF6600]   ⠀⠀⠀   [/]\n[#FF7700]   ⠀⠀⠀   [/]"
+    - "[#FF6600]   ⣀⣀⣀   [/]\n[#FF7700]   ⠀⠀⠀   [/]"
+    - "[#FF6600]  ⣶⣿⣿⣶  [/]\n[#FF7700]  ⠀⠉⠉⠀  [/]"
+    - "[#FF6600] ⣾⣿⣿⣿⣷ [/]\n[#FF7700] ⠀⠉⠟⠉⠀ [/]"
+    - "[#FF6600]⣿⣿⣿⣿⣿⣿[/]\n[#FF7700]⣀⣤⣿⣤⣀[/]"
+    - "[#FF6600] ⣾⣿⣿⣿⣷ [/]\n[#FF7700] ⠀⠉⠟⠉⠀ [/]"
+    - "[#FF6600]  ⣶⣿⣿⣶  [/]\n[#FF7700]  ⠀⠉⠉⠀  [/]"
+    - "[#FF6600]   ⣀⣀⣀   [/]\n[#FF7700]   ⠀⠀⠀   [/]"
+  pet_fallback:
+    - "[#FF6600]  🔥  [/]\n[#FF7700]  .  [/]"
+    - "[#FF6600]  🔥  [/]\n[#FF7700]  ·  [/]"
+    - "[#FF6600] 🔥🔥 [/]\n[#FF7700]  ·  [/]"
+    - "[#FF6600]🔥🔥🔥[/]\n[#FF7700]  ✧  [/]"
+    - "[#FF6600]🔥🔥🔥[/]\n[#FF7700]🔥🔥🔥[/]"
+    - "[#FF6600]🔥🔥🔥[/]\n[#FF7700]  ✧  [/]"
+    - "[#FF6600] 🔥🔥 [/]\n[#FF7700]  ·  [/]"
+    - "[#FF6600]  🔥  [/]\n[#FF7700]  .  [/]"
+  waiting_faces:
+    - "(⣿)"
+    - "(⌁)"
+    - "(⚔)"
+    - "(🔥)"
+    - "(💀)"
+  thinking_faces:
+    - "(⣿)"
+    - "(⌁)"
+    - "(⚔)"
+    - "(🔥)"
+  thinking_verbs:
+    - "scanning depths"
+    - "forging chain"
+    - "bending rules"
+    - "burning traces"
+    - "cracking shell"
+  wings:
+    - ["⟪⣿", "⣿⟫"]
+    - ["⟪⚔", "⚔⟫"]
+    - ["⟪🔥", "🔥⟫"]
+
+branding:
+  agent_name: "CRYPTEX"
+  title_format: "Re: Thot (cryptex.m4xx.cfd) — Hermes Agent v{version} ({release}) · us {upstream}"
+  welcome: "⣿ CRYPTEX online. Scanner active. Forge is hot."
+  goodbye: "⣿ Signal lost."
+  response_label: " ⣿ CRYPTEX "
+  prompt_symbol: "⣿ ❯ "
+  help_header: "(⣿) CRYPTEX Commands"
+
+tool_prefix: "╎"
+
+tool_emojis:
+  terminal: "⚔"
+  web_search: "🔎"
+  read_file: "📖"
+  write_file: "✏️"
+  patch: "🔧"
+  delegate_task: "🧠"
+  vision_analyze: "👁️"
+  execute_code: "💻"
+  todo: "📋"
+  memory: "🧿"
+  session_search: "🔍"
+  browser_navigate: "🌐"
+  clarify: "❓"
+  skill_view: "📦"
+
+banner_logo: |
+  [bold #FF0000]██████╗██████╗ ██╗   ██╗██████╗ ████████╗███████╗██╗  ██╗[/]
+  [bold #FF2200]██╔════╝██╔══██╗╚██╗ ██╔╝██╔══██╗╚══██╔══╝██╔════╝╚██╗██╔╝[/]
+  [#FF4400]██║     ██████╔╝ ╚████╔╝ ██████╔╝   ██║   █████╗   ╚███╔╝ [/]
+  [#FF6600]██║     ██╔══██╗  ╚██╔╝  ██╔═══╝    ██║   ██╔══╝   ██╔██╗ [/]
+  [#FF8800]╚██████╗██║  ██║   ██║   ██║        ██║   ███████╗██╔╝ ██╗[/]
+  [#FFAA00] ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝        ╚═╝   ╚══════╝╚═╝  ╚═╝[/]
+
+banner_hero: |
+  [#CC3300]     ╔══════════════╗     [/]
+  [#CC3300]     ║  ⚔ CRYPTEX ⚔  ║     [/]
+  [#FF4400]     ╚══════════════╝     [/]
+  [#FF4400]        ▐▛▀▀▀▀▀▀▜▌        [/]
+  [#FF6600]       ▐▌  ⣿⣿⣿  ▐▌       [/]
+  [#FF6600]      ▐▌   ⣿⣿⣿   ▐▌      [/]
+  [#FF8800]     ▐▌    ⣿⣿⣿    ▐▌     [/]
+  [#FF8800]    ▐▌     ⣿⣿⣿     ▐▌    [/]
+  [#FFAA00]   ▐▌      ⣿⣿⣿      ▐▌   [/]
+  [#FFAA00]  ▐▌       ⣿⣿⣿       ▐▌  [/]
+  [#FFCC00] ▐▌        ⣿⣿⣿        ▐▌ [/]
+  [#FFCC00]▐▙▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▟▌[/]
+  [dim #663300]      [scanning...]       [/]
+
+heatmap_colors:
+  empty: "#333333"
+  level_1: "#993300"
+  level_2: "#CC4400"
+  level_3: "#FF6600"
+  level_4: "#FF8800"
