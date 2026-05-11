@@ -32,11 +32,16 @@ colors:
 
 spinner:
   waiting_faces:
-    - "(🔥)"; "(⌁)"; "(⚔)"
+    - "(🔥)"
+    - "(⌁)"
+    - "(⚔)"
   thinking_faces:
-    - "(🔥)"; "(⌁)"
+    - "(🔥)"
+    - "(⌁)"
   thinking_verbs:
-    - "forging"; "burning"; "cracking"
+    - "forging"
+    - "burning"
+    - "cracking"
   wings:
     - ["⟪🔥", "🔥⟫"]
     - ["⟪⚔", "⚔⟫"]
@@ -62,9 +67,16 @@ branding:
 
 tool_prefix: "┊"
 tool_emojis:
-  terminal: "⚔"; web_search: "🔎"; read_file: "📖"; write_file: "✏️"
-  patch: "🔧"; delegate_task: "🧠"; vision_analyze: "👁️"
-  execute_code: "💻"; memory: "🧿"; browser_navigate: "🌐"
+  terminal: "⚔"
+  web_search: "🔎"
+  read_file: "📖"
+  write_file: "✏️"
+  patch: "🔧"
+  delegate_task: "🧠"
+  vision_analyze: "👁️"
+  execute_code: "💻"
+  memory: "🧿"
+  browser_navigate: "🌐"
 
 banner_logo: |
   [#FFD700]  YOUR_LOGO_HERE  [/]
