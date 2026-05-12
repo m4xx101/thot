@@ -5,11 +5,30 @@
 # ═══════════════════════════════════════════════════════════════
 set -euo pipefail
 H="${HERMES_HOME:-$HOME/.hermes}"
-G='\033[0;32m'; O='\033[0;33m'; N='\033[0m'
+G='\033[0;32m'; O='\033[0;33m'; R='\033[0;31m'; N='\033[0m'
 
 echo ""
 echo -e "  ${O}⣿ THOT Uninstaller${N}"
 echo ""
+
+# ── Already-installed? ───────────────────────────
+SKIN_F="$H/skins/thot.yaml"
+if [ ! -f "$SKIN_F" ]; then
+    python3 -c "
+import yaml,os
+cp=os.path.join(os.environ.get('HERMES_HOME',os.path.expanduser('~/.hermes')),'config.yaml')
+try:
+    c=yaml.safe_load(open(cp)) or {}
+    s=c.get('display',{}).get('skin','')
+except: s=''
+if s!='thot': exit(1)
+" 2>/dev/null || {
+        echo -e "  ${R}✗${N} THOT is not installed"
+        echo -e "  ${O}→${N} Nothing to uninstall."
+        echo ""
+        exit 0
+    }
+fi
 
 # 1. Revert skin in config
 python3 -c "

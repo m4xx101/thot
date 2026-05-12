@@ -20,14 +20,20 @@ from pathlib import Path
 # ── Dependency management ────────────────────────
 
 def _ensure_pyfiglet():
+    """Return pyfiglet module or None if unavailable. Never crashes."""
     try:
         import pyfiglet; return pyfiglet
     except ImportError:
+        pass
+    try:
         subprocess.check_call(
             [sys.executable, "-m", "pip", "install", "pyfiglet", "-q", "--break-system-packages"],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=30
         )
         import pyfiglet; return pyfiglet
+    except Exception as e:
+        print(f"[thot] pyfiglet unavailable ({e}), using text fallback", file=sys.stderr)
+        return None
 
 
 # ── Full palette definitions (all 30+ keys) ──────
@@ -108,13 +114,63 @@ def _palette_gradient(palette_name):
 
 # ── Logo generation ──────────────────────────────
 
+def _text_logo(name, palette_name):
+    """Pure-Python fallback logo — works without pyfiglet."""
+    p = PALETTES[palette_name]
+    name_upper = name.upper().strip()
+    LETTERS_5X5 = {
+        'A': [' ███ ', '█   █', '█████', '█   █', '█   █'],
+        'B': ['████ ', '█   █', '████ ', '█   █', '████ '],
+        'C': [' ████', '█    ', '█    ', '█    ', ' ████'],
+        'D': ['████ ', '█   █', '█   █', '█   █', '████ '],
+        'E': ['█████', '█    ', '████ ', '█    ', '█████'],
+        'F': ['█████', '█    ', '████ ', '█    ', '█    '],
+        'G': [' ████', '█    ', '█  ██', '█   █', ' ████'],
+        'H': ['█   █', '█   █', '█████', '█   █', '█   █'],
+        'I': ['█████', '  █  ', '  █  ', '  █  ', '█████'],
+        'J': ['█████', '   █ ', '   █ ', '█  █ ', ' ██  '],
+        'K': ['█   █', '█  █ ', '███  ', '█  █ ', '█   █'],
+        'L': ['█    ', '█    ', '█    ', '█    ', '█████'],
+        'M': ['█   █', '██ ██', '█ █ █', '█   █', '█   █'],
+        'N': ['█   █', '██  █', '█ █ █', '█  ██', '█   █'],
+        'O': [' ███ ', '█   █', '█   █', '█   █', ' ███ '],
+        'P': ['████ ', '█   █', '████ ', '█    ', '█    '],
+        'Q': [' ███ ', '█   █', '█ █ █', '█  █ ', ' ██ █'],
+        'R': ['████ ', '█   █', '████ ', '█  █ ', '█   █'],
+        'S': [' ████', '█    ', ' ███ ', '    █', '████ '],
+        'T': ['█████', '  █  ', '  █  ', '  █  ', '  █  '],
+        'U': ['█   █', '█   █', '█   █', '█   █', ' ███ '],
+        'V': ['█   █', '█   █', ' █ █ ', ' █ █ ', '  █  '],
+        'W': ['█   █', '█   █', '█ █ █', '██ ██', '█   █'],
+        'X': ['█   █', ' █ █ ', '  █  ', ' █ █ ', '█   █'],
+        'Y': ['█   █', ' █ █ ', '  █  ', '  █  ', '  █  '],
+        'Z': ['█████', '   █ ', '  █  ', ' █   ', '█████'],
+        ' ': ['     ', '     ', '     ', '     ', '     '],
+        '-': ['     ', '     ', '█████', '     ', '     '],
+        '_': ['     ', '     ', '     ', '     ', '█████'],
+    }
+    gradient = _palette_gradient(palette_name)
+    lines = ['', '', '', '', '']
+    for i, ch in enumerate(name_upper[:8]):
+        glyph = LETTERS_5X5.get(ch, LETTERS_5X5.get(' ', ['     ']*5))
+        c = gradient[min(i, len(gradient) - 1)]
+        for row in range(5):
+            lines[row] += f'[{c}]{glyph[row]}[/] '
+    return '\n'.join(lines)
+
+
 def generate_logo(name, palette_name, font="banner3-D"):
     """Generate Rich-markup ASCII logo with themed gradient colors."""
     pf = _ensure_pyfiglet()
+    if pf is None:
+        return _text_logo(name, palette_name)
     try:
         art = pf.figlet_format(name, font=font)
     except Exception:
-        art = pf.figlet_format(name, font="standard")
+        try:
+            art = pf.figlet_format(name, font="standard")
+        except Exception:
+            return _text_logo(name, palette_name)
 
     lines = [l for l in art.split("\n") if l.strip()]
     gradient = _palette_gradient(palette_name)
@@ -188,7 +244,7 @@ def generate_hero(name, palette_name, style="scanner"):
         # Expand {═*12} → ════════════, {▀*6} → ▀▀▀▀▀▀
         import re
         line = tpl
-        line = line.replace("{name}", name[:8])
+        line = re.sub(r'\{name(?::\^(\d+))?\}', lambda m: name[:int(m.group(1))].center(int(m.group(1))) if m.group(1) else name[:8], line)
         line = line.replace("{icon}", icon)
         # Handle {"="*N} patterns
         line = re.sub(r'\{"(.)"\*(\d+)\}', lambda m: m.group(1) * int(m.group(2)), line)
@@ -266,27 +322,36 @@ def apply_theme(skin_path, agent_name, palette_name, pet_seed=None):
     with open(skin_path) as f:
         skin = yaml.safe_load(f) or {}
 
-    # 1. Apply ALL colors
+    # 1. Apply ALL colors (ALWAYS succeeds)
     if palette_name in PALETTES:
         skin["colors"].update(PALETTES[palette_name])
 
-    # 2. Generate and apply logo
-    logo = generate_logo(agent_name, palette_name)
-    skin["banner_logo"] = logo + "\n"
+    # 2. Generate and apply logo (non-fatal)
+    try:
+        logo = generate_logo(agent_name, palette_name)
+        skin["banner_logo"] = logo + "\n"
+    except Exception as e:
+        print(f"[thot] logo generation failed: {e}", file=sys.stderr)
 
-    # 3. Generate and apply hero
-    hero_styles = list(HERO_TEMPLATES.keys())
-    hero_style = hero_styles[hash(agent_name + palette_name) % len(hero_styles)]
-    hero = generate_hero(agent_name, palette_name, hero_style)
-    skin["banner_hero"] = hero + "\n"
+    # 3. Generate and apply hero (non-fatal)
+    try:
+        hero_styles = list(HERO_TEMPLATES.keys())
+        hero_style = hero_styles[hash(agent_name + palette_name) % len(hero_styles)]
+        hero = generate_hero(agent_name, palette_name, hero_style)
+        skin["banner_hero"] = hero + "\n"
+    except Exception as e:
+        print(f"[thot] hero generation failed: {e}", file=sys.stderr)
 
-    # 4. Generate and apply pet frames
-    if pet_seed is None:
-        import time
-        pet_seed = int(time.time() * 1000) % 10000
-    frames, fallback = generate_pet_frames(pet_seed, palette_name)
-    skin["spinner"]["pet_frames"] = frames
-    skin["spinner"]["pet_fallback"] = fallback
+    # 4. Generate and apply pet frames (non-fatal)
+    try:
+        if pet_seed is None:
+            import time
+            pet_seed = int(time.time() * 1000) % 10000
+        frames, fallback = generate_pet_frames(pet_seed, palette_name)
+        skin["spinner"]["pet_frames"] = frames
+        skin["spinner"]["pet_fallback"] = fallback
+    except Exception as e:
+        print(f"[thot] pet generation failed: {e}", file=sys.stderr)
 
     # 5. Apply branding
     skin["branding"]["agent_name"] = agent_name

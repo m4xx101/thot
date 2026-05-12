@@ -4,7 +4,7 @@
 # curl -fsSL https://raw.githubusercontent.com/m4xx101/thot/main/scripts/install.sh | bash
 # ═══════════════════════════════════════════════════════════════
 set -euo pipefail
-V="1.0.0"; SKIN="thot"; H="${HERMES_HOME:-$HOME/.hermes}"
+V="1.1.0"; SKIN="thot"; H="${HERMES_HOME:-$HOME/.hermes}"
 REPO="https://raw.githubusercontent.com/m4xx101/thot/main"
 G='\033[0;32m'; R='\033[0;31m'; C='\033[0;36m'; O='\033[0;33m'; W='\033[1;37m'; D='\033[2m'; N='\033[0m'
 
@@ -43,6 +43,74 @@ echo -e "  ${O}⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿�
 echo -e "  ${O}║  THOT v${V} — Living Terminal Identity      ║${N}"
 echo -e "  ${O}⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿${N}"
 echo ""
+
+# ── Phase 0: Already-installed check ──────────────
+_detect_installed() {
+    # Returns "full|partial|none"
+    local skin_f="$H/skins/thot.yaml"
+    local cfg_f="$H/config.yaml"
+    local active=""
+    # Check if config says skin=thot
+    if [ -f "$cfg_f" ]; then
+        active=$(python3 -c "
+import yaml,sys
+try:
+    c=yaml.safe_load(open('$cfg_f')) or {}
+    print(c.get('display',{}).get('skin',''))
+except: pass
+" 2>/dev/null)
+    fi
+    if [ "$active" = "thot" ] && [ -f "$skin_f" ]; then
+        echo "full"
+    elif [ -f "$skin_f" ] || [ "$active" = "thot" ]; then
+        echo "partial"
+    else
+        echo "none"
+    fi
+}
+
+INSTALLED_STATE=$(_detect_installed)
+
+if [ "$INSTALLED_STATE" != "none" ]; then
+    echo -e "  ${O}⚠  THOT is already installed${N}"
+    echo ""
+    # Show current state
+    if [ -f "$H/skins/thot.yaml" ]; then
+        python3 -c "
+import yaml
+s=yaml.safe_load(open('$H/skins/thot.yaml')) or {}
+name=s.get('branding',{}).get('agent_name','THOT')
+colors=s.get('colors',{})
+# Try to guess palette
+c_border=colors.get('banner_border','')
+c_title=colors.get('banner_title','')
+if '#CC3300' in c_border: pal='fire'
+elif '#2A6FB9' in c_border: pal='ocean'
+elif '#2E7D32' in c_border: pal='forest'
+elif '#00FFFF' in c_border: pal='cyberpunk'
+elif '#555555' in c_border: pal='mono'
+else: pal='custom'
+pet=len(s.get('spinner',{}).get('pet_frames',[]))
+heat='yes' if s.get('heatmap_colors') else 'no'
+print(f'  {name} · {pal} · pet({pet} frames) · heatmap({heat})')
+" 2>/dev/null
+    fi
+    echo ""
+    echo -ne "  ${W}Update? This will regenerate art, pet & theme${N} [Y/n]: "
+    if [ -t 0 ]; then
+        read -r answer < /dev/tty 2>/dev/null || answer=""
+    else
+        answer=""  # non-interactive: default to update
+    fi
+    case "${answer:-y}" in
+        n|N|no|No)
+            echo -e "\n  ${O}→${N} Keeping current install. To force: ${D}curl ...install.sh | bash -s -- --force${N}"
+            echo ""
+            exit 0
+            ;;
+    esac
+    echo -e "\n  ${G}→${N} Updating THOT...\n"
+fi
 
 # ── Phase 1: Detect environment ───────────────────
 _start_spin "Detecting Hermes installation..."
@@ -85,6 +153,13 @@ _start_spin "Checking Python/YAML..."
 python3 -c "import yaml" 2>/dev/null || python3 -m pip install pyyaml -q --break-system-packages 2>/dev/null || true
 _stop_spin_ok "Dependencies ready"
 
+_start_spin "Installing pyfiglet (font rendering)..."
+python3 -c "import pyfiglet" 2>/dev/null || python3 -m pip install pyfiglet -q --break-system-packages 2>/dev/null || {
+    _stop_spin_warn "pyfiglet unavailable — will use block-art fallback for logo"
+    PYFIGLET_OK="no"
+}
+[ "${PYFIGLET_OK:-yes}" != "no" ] && _stop_spin_ok "pyfiglet ready" || true
+
 # ── Phase 6: Interactive setup ────────────────────
 # Save original stdin, read from /dev/tty, then restore.
 # This prevents 'exec < /dev/tty' from hanging the script on exit.
@@ -93,8 +168,7 @@ PALETTE="fire"
 PET_ENABLED="yes"
 HEATMAP_ENABLED="yes"
 
-_exec_tty="${EXEC_TTY:-}"
-if [ -t 0 ] || [ -e /dev/tty ]; then
+if [ -t 0 ]; then
     echo ""
     echo -e "  ${O}─── First-Run Setup ───${N}"
     echo ""
@@ -135,17 +209,37 @@ if [ -t 0 ] || [ -e /dev/tty ]; then
     echo ""
     echo -e "  ${G}✓${N} Setup: ${AGENT_NAME} · ${PALETTE} · pet:${PET_ENABLED} · heatmap:${HEATMAP_ENABLED}"
 else
-    echo -e "  ${O}⚠${N} Non-interactive — using defaults (THOT, fire, pet on, heatmap on)"
+    # Non-interactive: read answers from piped stdin (one per line)
+    echo -e "  ${O}─── Reading setup from stdin... ───${N}"
+    read -r answer || answer=""; [ -n "${answer:-}" ] && AGENT_NAME="$answer"
+    read -r answer || answer=""
+    case "${answer:-f}" in
+        o|O) PALETTE="ocean" ;; g|G) PALETTE="forest" ;;
+        c|C) PALETTE="cyberpunk" ;; m|M) PALETTE="mono" ;;
+        *)   PALETTE="fire" ;;
+    esac
+    read -r answer || answer=""
+    case "${answer:-y}" in n|N|no|No) PET_ENABLED="no" ;; esac
+    read -r answer || answer=""
+    case "${answer:-y}" in n|N|no|No) HEATMAP_ENABLED="no" ;; esac
+    echo -e "  ${G}✓${N} Setup: ${AGENT_NAME} · ${PALETTE} · pet:${PET_ENABLED} · heatmap:${HEATMAP_ENABLED}"
 fi
 
 # ── Phase 7: Generate theme (logo, hero, pet, ALL colors) ──
 _start_spin "Generating theme assets..."
 THEME_SCRIPT=$(resolve "scripts/generate-theme.py") || true
 if [ -n "${THEME_SCRIPT:-}" ] && [ -f "$THEME_SCRIPT" ]; then
-    /usr/bin/python3 "$THEME_SCRIPT" \
+    THEME_ERR=$(mktemp)
+    if /usr/bin/python3 "$THEME_SCRIPT" \
         --skin "$H/skins/$SKIN.yaml" \
         --name "${AGENT_NAME}" \
-        --palette "${PALETTE}" 2>/dev/null && _stop_spin_ok "Theme generated (${AGENT_NAME} · ${PALETTE})" || _stop_spin_warn "Theme generation skipped"
+        --palette "${PALETTE}" 2>"$THEME_ERR"; then
+        _stop_spin_ok "Theme generated (${AGENT_NAME} · ${PALETTE})"
+    else
+        _stop_spin_err "Theme generation failed:"
+        cat "$THEME_ERR" | while IFS= read -r line; do echo "    ${R}${line}${N}"; done
+    fi
+    rm -f "$THEME_ERR"
     [ "${THEME_SCRIPT#/tmp/}" != "$THEME_SCRIPT" ] && rm -f "$THEME_SCRIPT"
 else
     _stop_spin_warn "Theme generator unavailable — using defaults"
