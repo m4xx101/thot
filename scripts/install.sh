@@ -186,8 +186,8 @@ python3 -c "import yaml" 2>/dev/null || python3 -m pip install pyyaml -q --break
 _stop_spin_ok "Dependencies ready"
 
 _start_spin "Installing pyfiglet (font rendering)..."
-python3 -c "import pyfiglet" 2>/dev/null || python3 -m pip install pyfiglet -q --break-system-packages 2>/dev/null || {
-    _stop_spin_warn "pyfiglet unavailable — will use block-art fallback for logo"
+python3 -c "import pyfiglet" 2>/dev/null || python3 -m pip install pyfiglet -q --break-system-packages 2>/dev/null || python3 -m pip install pyfiglet -q --user 2>/dev/null || {
+    _stop_spin_warn "pyfiglet unavailable — will use box-art fallback for logo"
     PYFIGLET_OK="no"
 }
 [ "${PYFIGLET_OK:-yes}" != "no" ] && _stop_spin_ok "pyfiglet ready" || true
@@ -212,20 +212,28 @@ if [ -t 0 ]; then
 
     # Q2: Palette
     echo ""
-    echo -e "  ${W}Choose a vibe:${N}"
-    echo -e "    ${D}[f]${N} fire      ${O}████${N}  warm orange on black"
-    echo -e "    ${D}[o]${N} ocean     ${C}████${N}  deep blue and seafoam"
-    echo -e "    ${D}[g]${N} forest    ${G}████${N}  emerald green"
-    echo -e "    ${D}[c]${N} cyberpunk ${C}████${N}  neon on dark"
-    echo -e "    ${D}[m]${N} mono      ${W}████${N}  clean grayscale"
+    echo -e "  ${W}Choose a vibe (12 themes):${N}"
+    echo -e "    ${D}[f]${N} fire      ${O}████${N}  warm orange       ${D}[mi]${N} midnight  ${C}████${N}  deep indigo"
+    echo -e "    ${D}[o]${N} ocean     ${C}████${N}  deep blue         ${D}[cr]${N} crimson   ${R}████${N}  dark rose"
+    echo -e "    ${D}[g]${N} forest    ${G}████${N}  emerald green     ${D}[a]${N} amber     ${O}████${N}  warm gold"
+    echo -e "    ${D}[c]${N} cyberpunk ${C}████${N}  neon synth        ${D}[ar]${N} arctic    ${C}████${N}  ice blue"
+    echo -e "    ${D}[m]${N} mono      ${W}████${N}  clean grayscale   ${D}[mx]${N} matrix    ${G}████${N}  green terminal"
+    echo -e "    ${D}[su]${N} sunset   ${O}████${N}  warm gradient     ${D}[v]${N} void      ${W}████${N}  minimal dark"
     echo -ne "  ${W}Vibe${N} [f]: "
     read -r answer < /dev/tty 2>/dev/null || answer=""
     case "${answer:-f}" in
-        o|O) PALETTE="ocean" ;;
-        g|G) PALETTE="forest" ;;
-        c|C) PALETTE="cyberpunk" ;;
-        m|M) PALETTE="mono" ;;
-        *)   PALETTE="fire" ;;
+        o|O)     PALETTE="ocean" ;;
+        g|G)     PALETTE="forest" ;;
+        c|C)     PALETTE="cyberpunk" ;;
+        m|M)     PALETTE="mono" ;;
+        mi|MI|Mi) PALETTE="midnight" ;;
+        cr|CR|Cr) PALETTE="crimson" ;;
+        a|A)     PALETTE="amber" ;;
+        ar|AR|Ar) PALETTE="arctic" ;;
+        mx|MX|Mx) PALETTE="matrix" ;;
+        su|SU|Su) PALETTE="sunset" ;;
+        v|V)     PALETTE="void" ;;
+        *)       PALETTE="fire" ;;
     esac
 
     # Q3: Pet
@@ -233,25 +241,46 @@ if [ -t 0 ]; then
     read -r answer < /dev/tty 2>/dev/null || answer=""
     case "${answer:-y}" in n|N|no|No) PET_ENABLED="no" ;; esac
 
+    # Q3.5: Custom pet file
+    PET_FILE=""
+    if [ "${PET_ENABLED}" != "no" ]; then
+        echo -ne "  ${W}Custom pet file?${N} [skip]: "
+        read -r answer < /dev/tty 2>/dev/null || answer=""
+        if [ -n "${answer:-}" ] && [ -f "$answer" ]; then
+            PET_FILE="$answer"
+            echo -e "    ${G}→${N} Using custom pet: ${D}$(basename "$answer")${N}"
+        fi
+    fi
+
     # Q4: Heatmap
     echo -ne "  ${W}Activity heatmap?${N} [Y/n]: "
     read -r answer < /dev/tty 2>/dev/null || answer=""
     case "${answer:-y}" in n|N|no|No) HEATMAP_ENABLED="no" ;; esac
 
     echo ""
-    echo -e "  ${G}✓${N} Setup: ${AGENT_NAME} · ${PALETTE} · pet:${PET_ENABLED} · heatmap:${HEATMAP_ENABLED}"
+    echo -e "  ${G}✓${N} Setup: ${AGENT_NAME} · ${PALETTE} · pet:${PET_ENABLED}${PET_FILE:+ ($(basename $PET_FILE))} · heatmap:${HEATMAP_ENABLED}"
 else
     # Non-interactive: read answers from piped stdin (one per line)
     echo -e "  ${O}─── Reading setup from stdin... ───${N}"
     read -r answer || answer=""; [ -n "${answer:-}" ] && AGENT_NAME="$answer"
     read -r answer || answer=""
     case "${answer:-f}" in
-        o|O) PALETTE="ocean" ;; g|G) PALETTE="forest" ;;
-        c|C) PALETTE="cyberpunk" ;; m|M) PALETTE="mono" ;;
-        *)   PALETTE="fire" ;;
+        o|O)     PALETTE="ocean" ;; g|G)    PALETTE="forest" ;;
+        c|C)     PALETTE="cyberpunk" ;; m|M) PALETTE="mono" ;;
+        mi|MI|Mi) PALETTE="midnight" ;; cr|CR|Cr) PALETTE="crimson" ;;
+        a|A)     PALETTE="amber" ;; ar|AR|Ar) PALETTE="arctic" ;;
+        mx|MX|Mx) PALETTE="matrix" ;; su|SU|Su) PALETTE="sunset" ;;
+        v|V)     PALETTE="void" ;;
+        *)       PALETTE="fire" ;;
     esac
     read -r answer || answer=""
     case "${answer:-y}" in n|N|no|No) PET_ENABLED="no" ;; esac
+    # Pet file (only read if pet enabled)
+    PET_FILE=""
+    if [ "${PET_ENABLED}" != "no" ]; then
+        read -r answer || answer=""
+        if [ -n "${answer:-}" ] && [ -f "$answer" ]; then PET_FILE="$answer"; fi
+    fi
     read -r answer || answer=""
     case "${answer:-y}" in n|N|no|No) HEATMAP_ENABLED="no" ;; esac
     echo -e "  ${G}✓${N} Setup: ${AGENT_NAME} · ${PALETTE} · pet:${PET_ENABLED} · heatmap:${HEATMAP_ENABLED}"
@@ -265,8 +294,9 @@ if [ -n "${THEME_SCRIPT:-}" ] && [ -f "$THEME_SCRIPT" ]; then
     if python3 "$THEME_SCRIPT" \
         --skin "$H/skins/$SKIN.yaml" \
         --name "${AGENT_NAME}" \
-        --palette "${PALETTE}" 2>"$THEME_ERR"; then
-        _stop_spin_ok "Theme generated (${AGENT_NAME} · ${PALETTE})"
+        --palette "${PALETTE}" \
+        ${PET_FILE:+--pet-file "$PET_FILE"} 2>"$THEME_ERR"; then
+        _stop_spin_ok "Theme generated (${AGENT_NAME} · ${PALETTE}${PET_FILE:+ · custom pet})"
     else
         _stop_spin_err "Theme generation failed:"
         cat "$THEME_ERR" | while IFS= read -r line; do echo "    ${R}${line}${N}"; done
