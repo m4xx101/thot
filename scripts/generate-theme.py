@@ -36,6 +36,24 @@ def _ensure_pyfiglet():
         return None
 
 
+def _ensure_yaml():
+    """Ensure pyyaml is available. Installs if needed, raises if impossible."""
+    try:
+        import yaml; return yaml
+    except ImportError:
+        pass
+    try:
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "install", "pyyaml", "-q", "--break-system-packages"],
+            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=30
+        )
+        import yaml; return yaml
+    except Exception as e:
+        print(f"[thot] FATAL: pyyaml unavailable ({e})", file=sys.stderr)
+        print("[thot] Install manually: pip install pyyaml --break-system-packages", file=sys.stderr)
+        raise SystemExit(1) from e
+
+
 # ── Full palette definitions (all 30+ keys) ──────
 
 PALETTES = {
@@ -317,7 +335,7 @@ def generate_pet_frames(seed=None, palette_name="fire"):
 
 def apply_theme(skin_path, agent_name, palette_name, pet_seed=None):
     """Apply a full theme to a skin YAML file — regenerates everything."""
-    import yaml
+    yaml = _ensure_yaml()  # auto-installs if needed
 
     with open(skin_path) as f:
         skin = yaml.safe_load(f) or {}

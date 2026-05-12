@@ -262,7 +262,7 @@ _start_spin "Generating theme assets..."
 THEME_SCRIPT=$(resolve "scripts/generate-theme.py") || true
 if [ -n "${THEME_SCRIPT:-}" ] && [ -f "$THEME_SCRIPT" ]; then
     THEME_ERR=$(mktemp)
-    if /usr/bin/python3 "$THEME_SCRIPT" \
+    if python3 "$THEME_SCRIPT" \
         --skin "$H/skins/$SKIN.yaml" \
         --name "${AGENT_NAME}" \
         --palette "${PALETTE}" 2>"$THEME_ERR"; then
@@ -280,7 +280,7 @@ fi
 # ── Phase 7.5: Apply disable flags (pet/heatmap) ──
 if [ "${PET_ENABLED}" = "no" ]; then
     _start_spin "Disabling pet..."
-    /usr/bin/python3 -c "
+    python3 -c "
 import yaml; h='$H'
 s=yaml.safe_load(open(f'{h}/skins/thot.yaml')); s['spinner']['pet_frames']=[]; s['spinner']['pet_fallback']=[]
 yaml.dump(s,open(f'{h}/skins/thot.yaml','w'),default_flow_style=False,allow_unicode=True)
@@ -289,7 +289,7 @@ fi
 
 if [ "${HEATMAP_ENABLED}" = "no" ]; then
     _start_spin "Disabling heatmap..."
-    /usr/bin/python3 -c "
+    python3 -c "
 import yaml; h='$H'
 s=yaml.safe_load(open(f'{h}/skins/thot.yaml')); s.pop('heatmap_colors',None)
 yaml.dump(s,open(f'{h}/skins/thot.yaml','w'),default_flow_style=False,allow_unicode=True)
@@ -316,7 +316,7 @@ with open(cp, 'w') as f:
 PATCH_SCRIPT=$(resolve "scripts/apply-patches.py") || true
 if [ -n "${PATCH_SCRIPT:-}" ] && [ -f "$PATCH_SCRIPT" ] && [ "${HEATMAP_ENABLED}" != "no" ]; then
     _start_spin "Wiring heatmap into banner..."
-    /usr/bin/python3 "$PATCH_SCRIPT" --force 2>/dev/null && _stop_spin_ok "Heatmap wired" || _stop_spin_warn "Heatmap wiring skipped (skin still works)"
+    python3 "$PATCH_SCRIPT" --force 2>/dev/null && _stop_spin_ok "Heatmap wired" || _stop_spin_warn "Heatmap wiring skipped (skin still works)"
     [ "${PATCH_SCRIPT#/tmp/}" != "$PATCH_SCRIPT" ] && rm -f "$PATCH_SCRIPT"
 fi
 
