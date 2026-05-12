@@ -138,41 +138,37 @@ else
     echo -e "  ${O}⚠${N} Non-interactive — using defaults (THOT, fire, pet on, heatmap on)"
 fi
 
-# ── Phase 7: Apply customizations ─────────────────
-_start_spin "Applying customizations..."
-python3 -c "
-import yaml, os, json
-home = os.environ.get('HERMES_HOME', os.path.expanduser('~/.hermes'))
-sp = os.path.join(home, 'skins', 'thot.yaml')
+# ── Phase 7: Generate theme (logo, hero, pet, ALL colors) ──
+_start_spin "Generating theme assets..."
+THEME_SCRIPT=$(resolve "scripts/generate-theme.py") || true
+if [ -n "${THEME_SCRIPT:-}" ] && [ -f "$THEME_SCRIPT" ]; then
+    /usr/bin/python3 "$THEME_SCRIPT" \
+        --skin "$H/skins/$SKIN.yaml" \
+        --name "${AGENT_NAME}" \
+        --palette "${PALETTE}" 2>/dev/null && _stop_spin_ok "Theme generated (${AGENT_NAME} · ${PALETTE})" || _stop_spin_warn "Theme generation skipped"
+    [ "${THEME_SCRIPT#/tmp/}" != "$THEME_SCRIPT" ] && rm -f "$THEME_SCRIPT"
+else
+    _stop_spin_warn "Theme generator unavailable — using defaults"
+fi
 
-with open(sp) as f: skin = yaml.safe_load(f) or {}
+# ── Phase 7.5: Apply disable flags (pet/heatmap) ──
+if [ "${PET_ENABLED}" = "no" ]; then
+    _start_spin "Disabling pet..."
+    /usr/bin/python3 -c "
+import yaml; h='$H'
+s=yaml.safe_load(open(f'{h}/skins/thot.yaml')); s['spinner']['pet_frames']=[]; s['spinner']['pet_fallback']=[]
+yaml.dump(s,open(f'{h}/skins/thot.yaml','w'),default_flow_style=False,allow_unicode=True)
+" 2>/dev/null && _stop_spin_ok "Pet disabled" || _stop_spin_warn "Pet disable skipped"
+fi
 
-skin['branding']['agent_name'] = '${AGENT_NAME}'
-skin['branding']['welcome'] = '⣿ ${AGENT_NAME} online. Scanner active. Forge is hot.'
-skin['branding']['goodbye'] = '⣿ Signal lost.'
-skin['branding']['response_label'] = ' ⣿ ${AGENT_NAME} '
-skin['branding']['help_header'] = '(⣿) ${AGENT_NAME} Commands'
-
-palettes = {
-    'fire': {'banner_border':'#CC3300','banner_title':'#FFAA00','banner_accent':'#FF6600','banner_dim':'#663300','banner_text':'#FFF0E0','prompt':'#FFF0E0','response_border':'#FF6600','status_bar_bg':'#0A0A0A'},
-    'ocean': {'banner_border':'#2A6FB9','banner_title':'#A9DFFF','banner_accent':'#5DB8F5','banner_dim':'#153C73','banner_text':'#EAF7FF','prompt':'#EAF7FF','response_border':'#5DB8F5','status_bar_bg':'#0A0A0A'},
-    'forest': {'banner_border':'#2E7D32','banner_title':'#A5D6A7','banner_accent':'#66BB6A','banner_dim':'#1B5E20','banner_text':'#E8F5E9','prompt':'#E8F5E9','response_border':'#66BB6A','status_bar_bg':'#0A0A0A'},
-    'cyberpunk': {'banner_border':'#00FFFF','banner_title':'#FF00FF','banner_accent':'#00FF00','banner_dim':'#333333','banner_text':'#FFFFFF','prompt':'#FFFFFF','response_border':'#00FFFF','status_bar_bg':'#0A0A0A'},
-    'mono': {'banner_border':'#555555','banner_title':'#E6EDF3','banner_accent':'#AAAAAA','banner_dim':'#444444','banner_text':'#C9D1D9','prompt':'#C9D1D9','response_border':'#AAAAAA','status_bar_bg':'#0A0A0A'},
-}
-if '${PALETTE}' in palettes:
-    skin['colors'].update(palettes['${PALETTE}'])
-
-if '${PET_ENABLED}' == 'no':
-    skin['spinner']['pet_frames'] = []
-    skin['spinner']['pet_fallback'] = []
-
-if '${HEATMAP_ENABLED}' == 'no':
-    skin.pop('heatmap_colors', None)
-
-with open(sp, 'w') as f:
-    yaml.dump(skin, f, default_flow_style=False, allow_unicode=True)
-" 2>/dev/null && _stop_spin_ok "Customizations applied" || _stop_spin_warn "Customization skipped (non-fatal)"
+if [ "${HEATMAP_ENABLED}" = "no" ]; then
+    _start_spin "Disabling heatmap..."
+    /usr/bin/python3 -c "
+import yaml; h='$H'
+s=yaml.safe_load(open(f'{h}/skins/thot.yaml')); s.pop('heatmap_colors',None)
+yaml.dump(s,open(f'{h}/skins/thot.yaml','w'),default_flow_style=False,allow_unicode=True)
+" 2>/dev/null && _stop_spin_ok "Heatmap disabled" || _stop_spin_warn "Heatmap disable skipped"
+fi
 
 # ── Phase 8: Activate skin ────────────────────────
 _start_spin "Activating skin..."
@@ -189,6 +185,14 @@ config.setdefault('display', {})['skin'] = 'thot'
 with open(cp, 'w') as f:
     yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
 " 2>/dev/null && _stop_spin_ok "Skin activated" || _stop_spin_err "Config update failed — run: hermes config set display.skin thot"
+
+# ── Phase 9: Wire in heatmap (optional source patch) ──
+PATCH_SCRIPT=$(resolve "scripts/apply-patches.py") || true
+if [ -n "${PATCH_SCRIPT:-}" ] && [ -f "$PATCH_SCRIPT" ] && [ "${HEATMAP_ENABLED}" != "no" ]; then
+    _start_spin "Wiring heatmap into banner..."
+    /usr/bin/python3 "$PATCH_SCRIPT" --force 2>/dev/null && _stop_spin_ok "Heatmap wired" || _stop_spin_warn "Heatmap wiring skipped (skin still works)"
+    [ "${PATCH_SCRIPT#/tmp/}" != "$PATCH_SCRIPT" ] && rm -f "$PATCH_SCRIPT"
+fi
 
 # ── Done ──────────────────────────────────────────
 echo ""
