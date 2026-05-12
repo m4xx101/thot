@@ -17,10 +17,12 @@ import os, yaml
 h=os.environ.get('HERMES_HOME',os.path.expanduser('~/.hermes'))
 cp=os.path.join(h,'config.yaml')
 if os.path.exists(cp):
-    c=yaml.safe_load(open(cp)) or {}
-    if c.get('display',{}).get('skin')=='thot':
+    with open(cp) as f:
+        c=yaml.safe_load(f) or {}
+    if c and c.get('display',{}).get('skin')=='thot':
         c['display']['skin']='default'
-        yaml.dump(c,open(cp,'w'),default_flow_style=False,allow_unicode=True)
+        with open(cp,'w') as f:
+            yaml.dump(c,f,default_flow_style=False,allow_unicode=True)
         print('REVERTED')
 " 2>/dev/null && echo -e "  ${G}✓${N} Skin reverted to default" || echo -e "  ${O}⚠${N} Config already default"
 

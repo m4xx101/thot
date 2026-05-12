@@ -101,7 +101,7 @@ if [ -t 0 ] || [ -e /dev/tty ]; then
 
     # Q1: Agent name
     echo -ne "  ${W}Agent name${N} [THOT]: "
-    read -r answer < /dev/tty 2>/dev/null || true
+    read -r answer < /dev/tty 2>/dev/null || answer=""
     if [ -n "${answer:-}" ]; then AGENT_NAME="$answer"; fi
 
     # Q2: Palette
@@ -113,7 +113,7 @@ if [ -t 0 ] || [ -e /dev/tty ]; then
     echo -e "    ${D}[c]${N} cyberpunk ${C}████${N}  neon on dark"
     echo -e "    ${D}[m]${N} mono      ${W}████${N}  clean grayscale"
     echo -ne "  ${W}Vibe${N} [f]: "
-    read -r answer < /dev/tty 2>/dev/null || true
+    read -r answer < /dev/tty 2>/dev/null || answer=""
     case "${answer:-f}" in
         o|O) PALETTE="ocean" ;;
         g|G) PALETTE="forest" ;;
@@ -124,12 +124,12 @@ if [ -t 0 ] || [ -e /dev/tty ]; then
 
     # Q3: Pet
     echo -ne "  ${W}Animated pet?${N} [Y/n]: "
-    read -r answer < /dev/tty 2>/dev/null || true
+    read -r answer < /dev/tty 2>/dev/null || answer=""
     case "${answer:-y}" in n|N|no|No) PET_ENABLED="no" ;; esac
 
     # Q4: Heatmap
     echo -ne "  ${W}Activity heatmap?${N} [Y/n]: "
-    read -r answer < /dev/tty 2>/dev/null || true
+    read -r answer < /dev/tty 2>/dev/null || answer=""
     case "${answer:-y}" in n|N|no|No) HEATMAP_ENABLED="no" ;; esac
 
     echo ""
@@ -180,9 +180,14 @@ python3 -c "
 import os, yaml
 home = os.environ.get('HERMES_HOME', os.path.expanduser('~/.hermes'))
 cp = os.path.join(home, 'config.yaml')
-config = yaml.safe_load(open(cp)) if os.path.exists(cp) else {}
+if os.path.exists(cp):
+    with open(cp) as f:
+        config = yaml.safe_load(f) or {}
+else:
+    config = {}
 config.setdefault('display', {})['skin'] = 'thot'
-yaml.dump(config, open(cp, 'w'), default_flow_style=False, allow_unicode=True)
+with open(cp, 'w') as f:
+    yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
 " 2>/dev/null && _stop_spin_ok "Skin activated" || _stop_spin_err "Config update failed — run: hermes config set display.skin thot"
 
 # ── Done ──────────────────────────────────────────
