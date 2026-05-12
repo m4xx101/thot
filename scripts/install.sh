@@ -46,20 +46,19 @@ echo ""
 
 # ── Phase 0: Already-installed check ──────────────
 _detect_installed() {
-    # Returns "full|partial|none"
+    # Returns "full|partial|none" — pure bash, no Python/yaml dependency
     local skin_f="$H/skins/thot.yaml"
     local cfg_f="$H/config.yaml"
     local active=""
-    # Check if config says skin=thot
+
+    # Check if config references skin=thot (without needing pyyaml)
     if [ -f "$cfg_f" ]; then
-        active=$(python3 -c "
-import yaml,sys
-try:
-    c=yaml.safe_load(open('$cfg_f')) or {}
-    print(c.get('display',{}).get('skin',''))
-except: pass
-" 2>/dev/null)
+        # YAML is simple enough: look for "skin: thot" line
+        if grep -qE '^\s*skin:\s*"?thot"?' "$cfg_f" 2>/dev/null; then
+            active="thot"
+        fi
     fi
+
     if [ "$active" = "thot" ] && [ -f "$skin_f" ]; then
         echo "full"
     elif [ -f "$skin_f" ] || [ "$active" = "thot" ]; then
@@ -69,38 +68,41 @@ except: pass
     fi
 }
 
-INSTALLED_STATE=$(_detect_installed)
+# ── Run detection (catch errors, never crash) ──────
+INSTALLED_STATE="$(_detect_installed 2>/dev/null || echo "none")"
 
 if [ "$INSTALLED_STATE" != "none" ]; then
     echo -e "  ${O}⚠  THOT is already installed${N}"
     echo ""
-    # Show current state
+    # Show current state (pure bash, no yaml dep)
     if [ -f "$H/skins/thot.yaml" ]; then
+        # Use Python only if yaml is available, otherwise show basic info
         python3 -c "
-import yaml
-s=yaml.safe_load(open('$H/skins/thot.yaml')) or {}
-name=s.get('branding',{}).get('agent_name','THOT')
-colors=s.get('colors',{})
-# Try to guess palette
-c_border=colors.get('banner_border','')
-c_title=colors.get('banner_title','')
-if '#CC3300' in c_border: pal='fire'
-elif '#2A6FB9' in c_border: pal='ocean'
-elif '#2E7D32' in c_border: pal='forest'
-elif '#00FFFF' in c_border: pal='cyberpunk'
-elif '#555555' in c_border: pal='mono'
-else: pal='custom'
-pet=len(s.get('spinner',{}).get('pet_frames',[]))
-heat='yes' if s.get('heatmap_colors') else 'no'
-print(f'  {name} · {pal} · pet({pet} frames) · heatmap({heat})')
-" 2>/dev/null
+try:
+    import yaml
+    s=yaml.safe_load(open('$H/skins/thot.yaml')) or {}
+    name=s.get('branding',{}).get('agent_name','THOT')
+    colors=s.get('colors',{})
+    c=colors.get('banner_border','')
+    if   '#CC3300' in c: pal='fire'
+    elif '#2A6FB9' in c: pal='ocean'
+    elif '#2E7D32' in c: pal='forest'
+    elif '#00FFFF' in c: pal='cyberpunk'
+    elif '#555555' in c: pal='mono'
+    else: pal='custom'
+    pet=len(s.get('spinner',{}).get('pet_frames',[]))
+    heat='yes' if s.get('heatmap_colors') else 'no'
+    print(f'  {name} · {pal} · pet({pet} frames) · heatmap({heat})')
+except:
+    print('  THOT · (yaml not available — re-run to inspect)')
+" 2>/dev/null || echo "  THOT · (detected: skin file exists)"
     fi
     echo ""
     echo -ne "  ${W}Update? This will regenerate art, pet & theme${N} [Y/n]: "
     if [ -t 0 ]; then
         read -r answer < /dev/tty 2>/dev/null || answer=""
     else
-        answer=""  # non-interactive: default to update
+        read -r answer || answer=""  # consume one line from piped stdin
     fi
     case "${answer:-y}" in
         n|N|no|No)
