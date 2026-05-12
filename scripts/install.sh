@@ -23,9 +23,9 @@ _start_spin() {
         done
     ) & _spin_pid=$!
 }
-_stop_spin_ok()  { [ -n "${_spin_pid:-}" ] && kill "$_spin_pid" 2>/dev/null; wait "$_spin_pid" 2>/dev/null; printf "\r  ${G}✓${N} %s\n" "${1:-}"; }
-_stop_spin_warn(){ [ -n "${_spin_pid:-}" ] && kill "$_spin_pid" 2>/dev/null; wait "$_spin_pid" 2>/dev/null; printf "\r  ${O}⚠${N} %s\n" "${1:-}"; }
-_stop_spin_err() { [ -n "${_spin_pid:-}" ] && kill "$_spin_pid" 2>/dev/null; wait "$_spin_pid" 2>/dev/null; printf "\r  ${R}✗${N} %s\n" "${1:-}"; }
+_stop_spin_ok()  { [ -n "${_spin_pid:-}" ] && kill "$_spin_pid" 2>/dev/null || true; wait "$_spin_pid" 2>/dev/null || true; printf "\r  ${G}✓${N} %s\n" "${1:-}"; _spin_pid=""; }
+_stop_spin_warn(){ [ -n "${_spin_pid:-}" ] && kill "$_spin_pid" 2>/dev/null || true; wait "$_spin_pid" 2>/dev/null || true; printf "\r  ${O}⚠${N} %s\n" "${1:-}"; _spin_pid=""; }
+_stop_spin_err() { [ -n "${_spin_pid:-}" ] && kill "$_spin_pid" 2>/dev/null || true; wait "$_spin_pid" 2>/dev/null || true; printf "\r  ${R}✗${N} %s\n" "${1:-}"; _spin_pid=""; }
 
 # ── Resolve file source ───────────────────────────
 resolve() {
