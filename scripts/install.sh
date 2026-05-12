@@ -3,6 +3,28 @@
 # THOT — Hermes Agent Living Terminal Identity Installer
 # curl -fsSL https://raw.githubusercontent.com/m4xx101/thot/main/scripts/install.sh | bash
 # ═══════════════════════════════════════════════════════════════
+
+# ── Pipe detection: curl|bash kills TTY — re-exec properly ──
+if [ ! -t 0 ]; then
+    # We're piped in (curl|bash, CI, etc).
+    # Try to re-exec with a real TTY for interactive setup.
+    # If /dev/tty is unavailable (CI, Docker), fall through to defaults.
+    _THOT_REEXEC=$(mktemp /tmp/thot-install-XXXXXX.sh)
+    if curl -fsSL --connect-timeout 5 --max-time 15 \
+        "https://raw.githubusercontent.com/m4xx101/thot/main/scripts/install.sh" \
+        -o "$_THOT_REEXEC" 2>/dev/null; then
+        # Attempt re-exec with /dev/tty. If no TTY available, fall through.
+        { exec bash "$_THOT_REEXEC" "$@" < /dev/tty; } 2>/dev/null || true
+    fi
+    # Re-exec failed or TTY unavailable — continue non-interactively
+    echo ""
+    echo -e "  ${O}─── Non-interactive mode ───${N}"
+    echo -e "  ${D}Tips for interactive setup:${N}"
+    echo -e "  ${D}  curl -fsSL https://raw.githubusercontent.com/m4xx101/thot/main/scripts/install.sh -o /tmp/thot.sh && bash /tmp/thot.sh${N}"
+    echo -e "  ${D}  …or pipe answers: printf 'NAME\\npalette\\ny\\ny\\n' | bash /tmp/thot.sh${N}"
+    echo ""
+fi
+
 set -euo pipefail
 V="1.1.0"; SKIN="thot"; H="${HERMES_HOME:-$HOME/.hermes}"
 REPO="https://raw.githubusercontent.com/m4xx101/thot/main"
@@ -30,10 +52,18 @@ _stop_spin_err() { [ -n "${_spin_pid:-}" ] && kill "$_spin_pid" 2>/dev/null || t
 # ── Resolve file source ───────────────────────────
 resolve() {
     local rel="$1"
-    local local_src="$(dirname "$0")/../${rel}"
+    # 1. Try relative to script location (works for git clones)
+    local script_dir="$(cd "$(dirname "$0")" 2>/dev/null && pwd || dirname "$0")"
+    local local_src="${script_dir}/../${rel}"
     if [ -f "$local_src" ]; then echo "$local_src"; return 0; fi
+    # 2. Try relative to PWD (works when running from repo root)
+    if [ -f "${rel}" ]; then echo "${PWD}/${rel}"; return 0; fi
+    # 3. Download from GitHub (3 retries, 5s timeout)
     local tmp="/tmp/thot-install-$$-$(basename "$rel")"
-    curl -fsSL "${REPO}/${rel}" -o "$tmp" 2>/dev/null && { echo "$tmp"; return 0; }
+    for i in 1 2 3; do
+        curl -fsSL --connect-timeout 5 --max-time 10 "${REPO}/${rel}" -o "$tmp" 2>/dev/null && { echo "$tmp"; return 0; }
+        sleep 1
+    done
     return 1
 }
 
