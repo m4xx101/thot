@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-boot-cryptex/hook.py — Gateway boot hook for CRYPTEX identity system.
+boot-thot/hook.py — Gateway boot hook for THOT identity system.
 
-Place at: ~/.hermes/hermes-agent/gateway/builtin_hooks/boot-cryptex/hook.py
+Place at: ~/.hermes/hermes-agent/gateway/builtin_hooks/boot-thot/hook.py
 Sends a one-time welcome message when a user first connects after install.
 """
 import json
@@ -11,7 +11,7 @@ from datetime import datetime
 from hermes_constants import get_hermes_home
 
 
-SENTINEL = get_hermes_home() / ".cryptex_welcome_sent"
+SENTINEL = get_hermes_home() / ".thot_welcome_sent"
 
 
 def _should_send():
@@ -19,7 +19,7 @@ def _should_send():
     if SENTINEL.exists():
         try:
             data = json.loads(SENTINEL.read_text())
-            skin_path = get_hermes_home() / "skins" / "cryptex.yaml"
+            skin_path = get_hermes_home() / "skins" / "thot.yaml"
             if skin_path.exists():
                 skin_mtime = skin_path.stat().st_mtime
                 if skin_mtime > data.get("sent_at", 0):
@@ -37,16 +37,16 @@ def _mark_sent():
 
 
 def build_welcome_message():
-    """Build the CRYPTEX welcome message with live stats."""
+    """Build the THOT welcome message with live stats."""
     try:
         from hermes_cli.extended_banner import build_stats_line
         stats = build_stats_line()
     except Exception:
-        stats = "CRYPTEX online."
+        stats = "THOT online."
 
     return (
         "⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n"
-        "⣿  CRYPTEX — Living Terminal Identity v1.0.0      ⣿\n"
+        "⣿  THOT — Living Terminal Identity v1.0.0         ⣿\n"
         "⣿                                                  ⣿\n"
         f"⣿  {stats}\n"
         "⣿                                                  ⣿\n"

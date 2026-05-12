@@ -17,7 +17,7 @@ from pathlib import Path
 HERMES_HOME = Path(os.environ.get("HERMES_HOME", Path.home() / ".hermes"))
 SRC = HERMES_HOME / "hermes-agent"
 VERSION_FILE = SRC / "hermes_cli" / "__init__.py"
-SENTINEL = HERMES_HOME / ".cryptex_patch_version"
+SENTINEL = HERMES_HOME / ".thot_patch_version"
 
 
 def get_version():

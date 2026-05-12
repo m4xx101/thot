@@ -1,5 +1,5 @@
-name: cryptex
-description: "CRYPTEX — living terminal identity. Animated braille pet, activity heatmap, unified panel."
+name: thot
+description: "THOT — living terminal identity. Animated braille pet, activity heatmap, unified panel."
 author: "m4xx101 / Sayvdev C."
 version: "1.0.0"
 homepage: "https://github.com/m4xx101/thot"
@@ -71,13 +71,13 @@ spinner:
     - ["⟪🔥", "🔥⟫"]
 
 branding:
-  agent_name: "CRYPTEX"
-  title_format: "Re: Thot (cryptex.m4xx.cfd) — Hermes Agent v{version} ({release}) · us {upstream}"
-  welcome: "⣿ CRYPTEX online. Scanner active. Forge is hot."
+  agent_name: "THOT"
+  title_format: "Re: Thot (thot.m4xx.cfd) — Hermes Agent v{version} ({release}) · us {upstream}"
+  welcome: "⣿ THOT online. Scanner active. Forge is hot."
   goodbye: "⣿ Signal lost."
-  response_label: " ⣿ CRYPTEX "
+  response_label: " ⣿ THOT "
   prompt_symbol: "⣿ ❯ "
-  help_header: "(⣿) CRYPTEX Commands"
+  help_header: "(⣿) THOT Commands"
 
 tool_prefix: "╎"
 
@@ -98,16 +98,16 @@ tool_emojis:
   skill_view: "📦"
 
 banner_logo: |
-  [bold #FF0000]██████╗██████╗ ██╗   ██╗██████╗ ████████╗███████╗██╗  ██╗[/]
-  [bold #FF2200]██╔════╝██╔══██╗╚██╗ ██╔╝██╔══██╗╚══██╔══╝██╔════╝╚██╗██╔╝[/]
-  [#FF4400]██║     ██████╔╝ ╚████╔╝ ██████╔╝   ██║   █████╗   ╚███╔╝ [/]
-  [#FF6600]██║     ██╔══██╗  ╚██╔╝  ██╔═══╝    ██║   ██╔══╝   ██╔██╗ [/]
-  [#FF8800]╚██████╗██║  ██║   ██║   ██║        ██║   ███████╗██╔╝ ██╗[/]
-  [#FFAA00] ╚═════╝╚═╝  ╚═╝   ╚═╝   ╚═╝        ╚═╝   ╚══════╝╚═╝  ╚═╝[/]
+  [bold #FF0000]████████╗██╗  ██╗ ██████╗ ████████╗[/]
+  [bold #FF2200]╚══██╔══╝██║  ██║██╔═══██╗╚══██╔══╝[/]
+  [#FF4400]   ██║   ███████║██║   ██║   ██║   [/]
+  [#FF6600]   ██║   ██╔══██║██║   ██║   ██║   [/]
+  [#FF8800]   ██║   ██║  ██║╚██████╔╝   ██║   [/]
+  [#FFAA00]   ╚═╝   ╚═╝  ╚═╝ ╚═════╝    ╚═╝   [/]
 
 banner_hero: |
   [#CC3300]     ╔══════════════╗     [/]
-  [#CC3300]     ║  ⚔ CRYPTEX ⚔  ║     [/]
+  [#CC3300]     ║  ⚔  THOT  ⚔  ║     [/]
   [#FF4400]     ╚══════════════╝     [/]
   [#FF4400]        ▐▛▀▀▀▀▀▀▜▌        [/]
   [#FF6600]       ▐▌  ⣿⣿⣿  ▐▌       [/]

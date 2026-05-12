@@ -14,8 +14,8 @@ def install():
     results = []
 
     # 1. Install skin YAML
-    src = script_dir / "skins" / "cryptex.yaml"
-    dst = HERMES_HOME / "skins" / "cryptex.yaml"
+    src = script_dir / "skins" / "thot.yaml"
+    dst = HERMES_HOME / "skins" / "thot.yaml"
     dst.parent.mkdir(parents=True, exist_ok=True)
     if not dst.exists() or src.stat().st_mtime > dst.stat().st_mtime:
         shutil.copy2(src, dst)
@@ -34,8 +34,8 @@ def install():
         results.append("extended_banner up-to-date")
 
     # 3. Install boot hook
-    src = script_dir / "gateway" / "boot-cryptex" / "hook.py"
-    dst = HERMES_HOME / "hermes-agent" / "gateway" / "builtin_hooks" / "boot-cryptex" / "hook.py"
+    src = script_dir / "gateway" / "boot-thot" / "hook.py"
+    dst = HERMES_HOME / "hermes-agent" / "gateway" / "builtin_hooks" / "boot-thot" / "hook.py"
     dst.parent.mkdir(parents=True, exist_ok=True)
     if not dst.exists():
         shutil.copy2(src, dst)
@@ -68,7 +68,7 @@ def install():
         config = yaml.safe_load(open(config_path)) or {}
     else:
         config = {}
-    config.setdefault("display", {})["skin"] = "cryptex"
+    config.setdefault("display", {})["skin"] = "thot"
     yaml.dump(config, open(config_path, "w"), default_flow_style=False, allow_unicode=True)
     results.append("skin activated")
 
@@ -85,7 +85,7 @@ def check():
     config_path = HERMES_HOME / "config.yaml"
     if config_path.exists():
         config = yaml.safe_load(open(config_path)) or {}
-        if config.get("display", {}).get("skin") == "cryptex":
+        if config.get("display", {}).get("skin") == "thot":
             print("ACTIVE")
             return
     print("INACTIVE")
