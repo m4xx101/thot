@@ -51,13 +51,16 @@ fi
 python3 -c "import yaml" 2>/dev/null || python3 -m pip install pyyaml -q --break-system-packages 2>/dev/null || true
 
 # ── Interactive first-run setup ───────────────────
-# Only runs if stdin is a terminal (not piped). Falls back to defaults silently.
+# Reads from /dev/tty so it works even when piped (curl|bash).
+# Falls back to defaults silently if no terminal available.
 AGENT_NAME="THOT"
 PALETTE="fire"
 PET_ENABLED="yes"
 HEATMAP_ENABLED="yes"
 
-if [ -t 0 ]; then
+if [ -t 0 ] || [ -e /dev/tty ]; then
+    # Redirect stdin from the real terminal, not the pipe
+    exec < /dev/tty
     echo ""
     echo -e "${O}─── First-Run Setup ───${N}"
     echo ""
